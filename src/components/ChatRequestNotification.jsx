@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient' // Ensure this is correctly configured
 import { AppContext } from '../context/AppContext';
-
+import axios from 'axios'
 const ChatRequestNotification = () => {
     const [pendingRequest, setPendingRequest] = useState(null)
     const [pendingRequests, setPendingRequests] = useState([]) // State to store all pending requests
@@ -52,9 +52,8 @@ const ChatRequestNotification = () => {
                 // Push new room to the existing requests
                 setPendingRequests((prevRequests) => [...prevRequests, newRoom]);
 
-                // Play audio notification
-                const audio = new Audio('/notify.mp3');
-                audio.play().catch((e) => console.warn('Audio play error:', e));
+                const audio = new Audio('/assets/ringtone/ringtone.mp3');
+                audio.play()
               }
             }
           )
@@ -72,7 +71,7 @@ const ChatRequestNotification = () => {
         if (!roomId) return;
 
         try {
-          await axios.post('http://localhost:3000/api/accept-chat', {
+          await axios.post('https://smvserver.vercel.app/api/accept-chat', {
             room_id: roomId,
             action: 'accept',
           });
@@ -88,7 +87,7 @@ const ChatRequestNotification = () => {
         if (!roomId) return;
 
         try {
-          await axios.post('http://localhost:3000/api/accept-chat', {
+          await axios.post('https://smvserver.vercel.app/api/accept-chat', {
             room_id: roomId,
             action: 'decline',
           });
