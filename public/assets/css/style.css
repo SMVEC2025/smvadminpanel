@@ -14520,38 +14520,24 @@ td.fc-header-center {
 
 .chat-sidebar-single {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: row;
   align-items: center;
   padding: 0.6875rem 1.5rem;
   cursor: pointer;
+  border-bottom: 1px solid lightblue;
+}
+.chat-sidebar-single.opened{
+  background-color: lightgrey;
 }
 
 .chat-sidebar-single.top-profile {
   padding: 1.5rem 1.5rem 1rem 1.5rem;
 }
 
-.chat-sidebar-single.active .img::after {
-  background-color: var(--success-main);
-}
-
 .chat-sidebar-single .img {
   position: relative;
 }
 
-.chat-sidebar-single .img::after {
-  position: absolute;
-  content: "";
-  bottom: 1px;
-  right: 2px;
-  width: 8px;
-  height: 8px;
-  background-color: var(--neutral-400);
-  border-radius: 50%;
-  -webkit-border-radius: 50%;
-  -moz-border-radius: 50%;
-  -ms-border-radius: 50%;
-  -o-border-radius: 50%;
-}
 
 .chat-sidebar-single .img img {
   width: 40px;
@@ -15724,3 +15710,31 @@ td.fc-header-center {
 }
 
 /* === footer css end === */
+.crn_main{
+
+}
+.crn_button{
+  color: white;
+  padding: 5px 12px;
+  border-radius: 30px;
+}
+.crn_button.accept{
+  background-color: green;
+}
+.crn_button.decline{
+  background-color: red;
+  margin-left: 10px;
+}
+.crn_main .para{
+  font-size: 18px;
+  color: black;
+  padding: 0;
+  margin: 0;
+}
+.crn_main .paraa{
+  font-size: 15px;
+  color: black;
+  padding: 0;
+  margin: 0;
+  
+}

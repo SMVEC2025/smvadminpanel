@@ -1,86 +1,118 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../supabaseClient'
-import axios from 'axios';
+import { supabase } from '../supabaseClient' // Ensure this is correctly configured
 
 const ChatRequestNotification = () => {
     const [pendingRequest, setPendingRequest] = useState(null)
+    const [pendingRequests, setPendingRequests] = useState([]) // State to store all pending requests
 
+    // Fetch initial pending requests from Supabase when component mounts
     useEffect(() => {
+        const fetchPendingRequests = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('room') // Table name: 'room'
+                    .select('*')
+                    .eq('status', 'pending'); // Filter for pending requests
+
+                if (error) {
+                    console.error('Error fetching pending requests from Supabase:', error.message);
+                } else {
+                    setPendingRequests(data); // Update state with fetched data
+                }
+            } catch (error) {
+                console.error('Error fetching pending requests:', error.message);
+            }
+        };
+
+        // Fetch pending requests initially when component mounts
+        fetchPendingRequests();
+
+        // Subscribe to real-time changes via Supabase for new requests
         const channel = supabase
           .channel('room_status_channel')
           .on(
             'postgres_changes',
             {
-              event: 'INSERT',
+              event: 'INSERT', // Trigger on new INSERT events
               schema: 'public',
               table: 'room',
             },
             (payload) => {
               console.log('📥 INSERT EVENT PAYLOAD:', payload)
       
-              const newRoom = payload.new
+              const newRoom = payload.new;
               if (newRoom.status === 'pending') {
-                console.log('🚀 New pending room:', newRoom)
-                setPendingRequest(newRoom)
-      
-                const audio = new Audio('/notify.mp3')
-                audio.play().catch((e) => console.warn('Audio play error:', e))
+                console.log('🚀 New pending room:', newRoom);
+                
+                // Push new room to the existing requests
+                setPendingRequests((prevRequests) => [...prevRequests, newRoom]);
+
+                // Play audio notification
+                const audio = new Audio('/notify.mp3');
+                audio.play().catch((e) => console.warn('Audio play error:', e));
               }
             }
           )
           .subscribe((status) => {
-            console.log('🔔 Subscribed to channel:', status)
-          })
-      
-        return () => {
-          supabase.removeChannel(channel)
-        }
-      }, [])
-    console.log(pendingRequest)
+            console.log('🔔 Subscribed to channel:', status);
+          });
 
-    const handleAccept = async () => {
-        if (!pendingRequest) return;
-      
+        // Clean up the channel when the component unmounts
+        return () => {
+          supabase.removeChannel(channel);
+        };
+    }, []); // Empty dependency array to run on mount only
+
+    const handleAccept = async (roomId) => {
+        if (!roomId) return;
+
         try {
           await axios.post('http://localhost:3000/api/accept-chat', {
-            room_id: pendingRequest.room_id,
+            room_id: roomId,
             action: 'accept',
           });
-      
-          setPendingRequest(null);
+
+          // Remove accepted request from the list
+          setPendingRequests((prevRequests) => prevRequests.filter(request => request.room_id !== roomId));
         } catch (error) {
           console.error('Error accepting chat:', error?.response?.data || error.message);
         }
-      };
-    const handleDecline = async () => {
-        if (!pendingRequest) return;
-      
+    };
+
+    const handleDecline = async (roomId) => {
+        if (!roomId) return;
+
         try {
           await axios.post('http://localhost:3000/api/accept-chat', {
-            room_id: pendingRequest.room_id,
+            room_id: roomId,
             action: 'decline',
           });
-      
-          setPendingRequest(null);
+
+          // Remove declined request from the list
+          setPendingRequests((prevRequests) => prevRequests.filter(request => request.room_id !== roomId));
         } catch (error) {
-          console.error('Error accepting chat:', error?.response?.data || error.message);
+          console.error('Error declining chat:', error?.response?.data || error.message);
         }
-      };
-  
+    };
+
     return (
       <div>
-        {pendingRequest && (
-          <div className="p-4 bg-yellow-100 border border-yellow-400 rounded shadow-lg">
-            <h3 className="text-lg font-semibold">New Chat Request</h3>
-            <p>User Email: {pendingRequest.email}</p>
-            <div className="flex gap-2 mt-2">
-              <button onClick={handleAccept} className="bg-green-500 text-white px-3 py-1 rounded">Accept</button>
-              <button onClick={handleDecline} className="bg-red-500 text-white px-3 py-1 rounded">Decline</button>
+        {pendingRequests.length > 0 ? (
+          pendingRequests.map((request) => (
+            <div className="crn_main" key={request.room_id}>
+              <p className="para">New Request</p>
+              <p className="paraa">Email: {request.email}</p>
+              <div className="flex gap-2 mt-2">
+                <button onClick={() => handleAccept(request.room_id)} className="crn_button accept">Accept</button>
+                <button onClick={() => handleDecline(request.room_id)} className="crn_button decline">Decline</button>
+              </div>
             </div>
-          </div>
+          ))
+        ) : (
+          <p>No pending requests</p>
         )}
       </div>
-    )
-  }
-  
-export default ChatRequestNotification
+    );
+};
+
+export default ChatRequestNotification;

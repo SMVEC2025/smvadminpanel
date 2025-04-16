@@ -6,16 +6,15 @@ const TableDataPage = () => {
   return (
     <>
 
-      {/* MasterLayout */}
-      <MasterLayout>
+
 
         {/* Breadcrumb */}
-        <Breadcrumb title="Basic Table" />
+        <Breadcrumb title="appointments" />
 
         {/* TableDataLayer */}
         <TableDataLayer />
 
-      </MasterLayout>
+  
 
     </>
   );

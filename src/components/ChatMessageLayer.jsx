@@ -86,16 +86,14 @@ const ChatMessageLayer = () => {
   console.log(selectedRoom)
   return (
     <div className='chat-wrapper'>
-      
-        
-     <ChatRequestNotification/>
+
       <div className='chat-sidebar card'>
 
 
         <div className='chat-all-list'>
           {userRooms.map((room) => (
 
-            <div className='chat-sidebar-single active' key={room} onClick={() => loadMessages(room)}>
+            <div className={`chat-sidebar-single ${selectedRoom == room?'opened':""}`} key={room} onClick={() => loadMessages(room)}>
               <div className='img' >
                 <img  style={{borderRadius:"50%"}}  src='https://img.freepik.com/free-vector/young-man-orange-hoodie_1308-175788.jpg' alt='image_icon' />
               </div>
