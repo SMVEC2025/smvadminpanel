@@ -71,14 +71,16 @@ const ChatRequestNotification = () => {
         if (!roomId) return;
 
         try {
-          await axios.post('https://smvserver.vercel.app/api/accept-chat', {
+         const response =  await axios.post('https://smvserver.vercel.app/api/accept-chat', {
             room_id: roomId,
             action: 'accept',
           });
-
+          console.log('✅ Chat accepted response:', response.data);
           // Remove accepted request from the list
           setPendingRequests((prevRequests) => prevRequests.filter(request => request.room_id !== roomId));
+         
         } catch (error) {
+
           console.error('Error accepting chat:', error?.response?.data || error.message);
         }
     };
