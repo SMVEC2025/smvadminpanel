@@ -71,7 +71,7 @@ const ChatRequestNotification = () => {
         if (!roomId) return;
 
         try {
-          await axios.post('http://localhost:3001/api/accept-chat', {
+          await axios.post('https://smvserver.vercel.app/api/accept-chat', {
             room_id: roomId,
             action: 'accept',
           });
