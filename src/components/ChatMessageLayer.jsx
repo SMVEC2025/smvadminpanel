@@ -2,6 +2,7 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 import { Link } from "react-router-dom";
 import { supabase } from '../supabaseClient';
 import { useEffect, useRef, useState } from "react";
+import ChatRequestNotification from "./ChatRequestNotification";
 
 const ChatMessageLayer = () => {
   const [userRooms, setUserRooms] = useState([]);
@@ -85,9 +86,10 @@ const ChatMessageLayer = () => {
 
   return (
     <div className='chat-wrapper'>
+      
+        
+     <ChatRequestNotification/>
       <div className='chat-sidebar card'>
-
-
 
 
         <div className='chat-all-list'>
