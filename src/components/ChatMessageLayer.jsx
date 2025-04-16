@@ -10,7 +10,7 @@ const ChatMessageLayer = () => {
   const [messages, setMessages] = useState([]);
   const [replyMsg, setReplyMsg] = useState('');
   const messagesEndRef = useRef(null);
-
+  
   // Fetch distinct rooms (user-wise)
   useEffect(() => {
     const fetchRooms = async () => {

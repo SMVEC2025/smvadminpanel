@@ -15738,3 +15738,14 @@ td.fc-header-center {
   margin: 0;
   
 }
+#ml_notify.open::after{
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: chocolate;
+  position: absolute;
+  content: "";
+  bottom: 2px;
+  right: 0;
+
+}

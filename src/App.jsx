@@ -8,6 +8,7 @@ import HomePageEight from "./pages/HomePageEight";
 import '../public/assets/css/style.css'
 import MasterLayout from "./masterLayout/MasterLayout";
 import DashBoardLayerEight from "./components/DashBoardLayerEight";
+import { AppProvider } from "./context/AppContext";
 function App() {
   return (
     // <BrowserRouter>
@@ -23,7 +24,7 @@ function App() {
     //   </Routes>
     // </BrowserRouter>
 
-
+<AppProvider>
 <BrowserRouter>
 <RouteScrollToTop />
 
@@ -36,6 +37,7 @@ function App() {
         <Route path="*" element={<ErrorPage />} />
       </Routes>
     </BrowserRouter>
+    </AppProvider>
   );
 }
 

@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient' // Ensure this is correctly configured
+import { AppContext } from '../context/AppContext';
 
 const ChatRequestNotification = () => {
     const [pendingRequest, setPendingRequest] = useState(null)
     const [pendingRequests, setPendingRequests] = useState([]) // State to store all pending requests
-
+  const {makeNotify,setMakeNotify} = useContext(AppContext)
     // Fetch initial pending requests from Supabase when component mounts
     useEffect(() => {
         const fetchPendingRequests = async () => {
@@ -18,6 +19,8 @@ const ChatRequestNotification = () => {
                     console.error('Error fetching pending requests from Supabase:', error.message);
                 } else {
                     setPendingRequests(data); // Update state with fetched data
+                setMakeNotify(true)
+
                 }
             } catch (error) {
                 console.error('Error fetching pending requests:', error.message);
@@ -43,6 +46,8 @@ const ChatRequestNotification = () => {
               const newRoom = payload.new;
               if (newRoom.status === 'pending') {
                 console.log('🚀 New pending room:', newRoom);
+                setMakeNotify(true)
+
                 
                 // Push new room to the existing requests
                 setPendingRequests((prevRequests) => [...prevRequests, newRoom]);
