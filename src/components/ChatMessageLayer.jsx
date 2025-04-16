@@ -83,7 +83,7 @@ const ChatMessageLayer = () => {
       alert('✅ Chat deleted');
     }
   };
-
+  console.log(selectedRoom)
   return (
     <div className='chat-wrapper'>
       
