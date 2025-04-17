@@ -5,6 +5,7 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import ThemeToggleButton from "../helper/ThemeToggleButton";
 import { Outlet } from 'react-router-dom';
 import NotificationBar from "../components/NotificationBar";
+import { IoIosRefresh } from "react-icons/io";
 
 const MasterLayout = ({ children }) => {
   let [sidebarActive, seSidebarActive] = useState(false);
@@ -88,7 +89,9 @@ const MasterLayout = ({ children }) => {
   let mobileMenuControl = () => {
     setMobileMenu(!mobileMenu);
   };
-
+  function hardRefreshPage() {
+    window.location.reload(true);
+  }
   return (
     <section className={mobileMenu ? "overlay active" : "overlay "}>
       {/* sidebar */}
@@ -199,20 +202,12 @@ const MasterLayout = ({ children }) => {
                  
                 {/* Language dropdown end */}
                 
+                <div className="refresh_button" onClick={hardRefreshPage}>
+                <IoIosRefresh/>
+                </div>
                 {/* Message dropdown end */}
                 <div className='dropdown'>
-                  <button style={{position:"relative"}} onClick={()=>{setOpenNotify(true)}}
-                    className='has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center'
-                    type='button'
-                    data-bs-toggle='dropdown'
-                    
-                  >
-                    <Icon
-                      icon='iconoir:bell'
-                      className='text-primary-light text-xl'
-                     
-                    />
-                  </button>
+                  
                   <div className='dropdown-menu to-top dropdown-menu-sm'>
                     <div className='py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2'>
                     <NotificationBar/>

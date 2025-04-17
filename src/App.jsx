@@ -5,10 +5,14 @@ import ErrorPage from "./pages/ErrorPage";
 import TableDataPage from "./pages/TableDataPage";
 import RouteScrollToTop from "./helper/RouteScrollToTop";
 import HomePageEight from "./pages/HomePageEight";
-import '../public/assets/css/style.css'
 import MasterLayout from "./masterLayout/MasterLayout";
 import DashBoardLayerEight from "./components/DashBoardLayerEight";
 import { AppProvider } from "./context/AppContext";
+import './assets/css/style.css';
+import './assets/css/extra.css';
+import './assets/css/remixicon.css';
+import NotificationBar from "./masterLayout/NotificationBar";
+
 function App() {
   return (
     // <BrowserRouter>
@@ -25,6 +29,8 @@ function App() {
     // </BrowserRouter>
 
 <AppProvider>
+  
+<NotificationBar/>
 <BrowserRouter>
 <RouteScrollToTop />
 
