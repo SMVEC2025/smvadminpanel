@@ -10,7 +10,7 @@ const ChatMessageLayer = () => {
   const [messages, setMessages] = useState([]);
   const [replyMsg, setReplyMsg] = useState('');
   const messagesEndRef = useRef(null);
-
+ 
   useEffect(() => {
     const fetchRooms = async () => {
       const { data } = await supabase
@@ -82,11 +82,13 @@ const ChatMessageLayer = () => {
       alert('✅ Chat deleted');
     }
   };
+
+  console.log("userRooms",userRooms)
   return (
     <div className='chat-wrapper'>
 
       <div className='chat-sidebar card'>
-
+ 
 
         <div className='chat-all-list'>
           {userRooms.map((room) => (
@@ -96,12 +98,12 @@ const ChatMessageLayer = () => {
                 <img  style={{borderRadius:"50%"}}  src='https://img.freepik.com/free-vector/young-man-orange-hoodie_1308-175788.jpg' alt='image_icon' />
               </div>
               <div className='info'>
-                <h6 className='text-sm mb-1'>{room}</h6>
+                <h6 className='text-sm mb-1'>user_{room?.substring(0, 4)}</h6>
                 {/* <p className='mb-0 text-xs'>hey! there I am...</p> */}
               </div>
               <div className='action text-end'>
-                <p className='mb-0 text-neutral-400 text-xs lh-1'>12:30 PM</p>
-                <span className='w-16-px h-16-px text-xs rounded-circle bg-warning-main text-white d-inline-flex align-items-center justify-content-center'>
+                {/* <p className='mb-0 text-neutral-400 text-xs lh-1'>12:30 PM</p> */}
+                <span className='w-10-px h-10-px text-xs rounded-circle bg-warning-main text-white d-inline-flex align-items-center justify-content-center'>
                   
                 </span>
               </div>
@@ -116,7 +118,7 @@ const ChatMessageLayer = () => {
             <img style={{borderRadius:"50%"}} src='https://img.freepik.com/free-vector/young-man-orange-hoodie_1308-175788.jpg' alt='image_icon' />
           </div>
           <div className='info'>
-            <h6 className='text-md mb-0'>{selectedRoom}</h6>
+            <h6 className='text-md mb-0'>user_{selectedRoom?.substring(0, 4)}</h6>
             {/* <p className='mb-0'>Available</p> */}
           </div>
           <div className='action d-inline-flex align-items-center gap-3'>
