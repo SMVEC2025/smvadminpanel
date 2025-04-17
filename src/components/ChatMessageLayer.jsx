@@ -10,8 +10,7 @@ const ChatMessageLayer = () => {
   const [messages, setMessages] = useState([]);
   const [replyMsg, setReplyMsg] = useState('');
   const messagesEndRef = useRef(null);
-  
-  // Fetch distinct rooms (user-wise)
+
   useEffect(() => {
     const fetchRooms = async () => {
       const { data } = await supabase
@@ -83,7 +82,6 @@ const ChatMessageLayer = () => {
       alert('✅ Chat deleted');
     }
   };
-  console.log(selectedRoom)
   return (
     <div className='chat-wrapper'>
 

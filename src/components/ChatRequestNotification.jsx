@@ -67,6 +67,23 @@ const ChatRequestNotification = () => {
         };
     }, []); // Empty dependency array to run on mount only
 
+    const sendAutoMessage = async (roomId) => {
+      const { error } = await supabase.from('messages').insert([
+        {
+          room_id: roomId,
+          sender_type: 'agent', // or agentId if you store specific agent
+          content: 'Hello! How can I assist you today?', // Your auto-message
+          created_at: new Date().toISOString(),
+        },
+      ]);
+    
+      if (error) {
+        console.error('Error sending auto-message:', error.message);
+      }
+    };
+    
+    
+    
     const handleAccept = async (roomId) => {
         if (!roomId) return;
 
@@ -75,6 +92,7 @@ const ChatRequestNotification = () => {
             room_id: roomId,
             action: 'accept',
           });
+          sendAutoMessage(roomId)
           console.log('✅ Chat accepted response:', response.data);
           // Remove accepted request from the list
           setPendingRequests((prevRequests) => prevRequests.filter(request => request.room_id !== roomId));
