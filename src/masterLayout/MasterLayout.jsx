@@ -1,18 +1,20 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import ThemeToggleButton from "../helper/ThemeToggleButton";
 import { Outlet } from 'react-router-dom';
 import NotificationBar from "../components/NotificationBar";
 import { IoIosRefresh } from "react-icons/io";
+import { AppContext } from "../context/AppContext";
 
 const MasterLayout = ({ children }) => {
   let [sidebarActive, seSidebarActive] = useState(false);
   let [mobileMenu, setMobileMenu] = useState(false);
   const location = useLocation(); // Hook to get the current route
   const [openNotify,setOpenNotify] = useState(false)
-
+  const {logout,user} = useContext(AppContext)
+ console.log(user)
   useEffect(() => {
     const handleDropdownClick = (event) => {
       event.preventDefault();
@@ -112,32 +114,45 @@ const MasterLayout = ({ children }) => {
           <Icon icon='radix-icons:cross-2' />
         </button>
         <div>
+         {sidebarActive?(
           <Link to='/' className='sidebar-logo'>
-            <img
-              src='assets/images/logofull.png'
-              alt='site logo'
-              className='light-logo'
-            />
-            <img
-              src='assets/images/logofull.png'
-              alt='site logo'
-              className='dark-logo'
-            />
-           
-          </Link>
+          <img
+            src='/assets/images/SMV_icon.png'
+            alt='site logo'
+
+          />
+       
+         
+        </Link>
+         ):(
+          <Link to='/' className='sidebar-logo'>
+          <img
+            src='/assets/images/logofull.png'
+            alt='site logo'
+            className='light-logo'
+          />
+          <img
+            src='/assets/images/logofull.png'
+            alt='site logo'
+            className='dark-logo'
+          />
+         
+        </Link>
+         )}
+          
         </div>
         <div className='sidebar-menu-area'>
           <ul className='sidebar-menu' id='sidebar-menu'>
-            <li>
-              <Link to='/'>
-                <Icon
-                  icon='solar:home-smile-angle-outline'
-                  className='menu-icon'
-                />
+          <li>
+          <NavLink
+                to='/'
+                className={("")}
+              >
+                <Icon icon='solar:home-smile-angle-outline'
+                  className='menu-icon' />
                 <span>Dashboard</span>
-              </Link>
-
-            </li>
+              </NavLink>
+              </li>
 
             <li>
               <NavLink
@@ -155,6 +170,15 @@ const MasterLayout = ({ children }) => {
               >
                 <Icon icon='bi:chat-dots' className='menu-icon' />
                 <span>Chat</span>
+              </NavLink>
+              </li>
+              <li>
+              <NavLink
+                to='queries'
+                className={(navData) => (navData.isActive ? "active-page" : "")}
+              >
+                <Icon icon='bi:chat-dots' className='menu-icon' />
+                <span>Queries</span>
               </NavLink>
               </li>
           </ul>
@@ -221,17 +245,15 @@ const MasterLayout = ({ children }) => {
                     type='button'
                     data-bs-toggle='dropdown'
                   >
-                    <img
-                      src='assets/images/logofull.png'
-                      alt='image_user'
-                      className='w-40-px h-40-px object-fit-cover rounded-circle'
-                    />
+                    <div className="admin-userdp">
+                      {user?.email[0]}
+                    </div>
                   </button>
                   <div className='dropdown-menu to-top dropdown-menu-sm'>
                     <div className='py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2'>
                       <div>
                         <h6 className='text-lg text-primary-light fw-semibold mb-2'>
-                          Shaidul Islam
+                          {user?.email}
                         </h6>
                         <span className='text-secondary-light fw-medium text-sm'>
                           Admin
@@ -246,10 +268,10 @@ const MasterLayout = ({ children }) => {
                     </div>
                     <ul className='to-top-list'>
                      
-                      <li>
+                      <li onClick={logout}>
                         <Link
                           className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-danger d-flex align-items-center gap-3'
-                          to='#'
+                          to=''
                         >
                           <Icon icon='lucide:power' className='icon text-xl' />{" "}
                           Log Out

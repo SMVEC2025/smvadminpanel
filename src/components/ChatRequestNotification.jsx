@@ -1,53 +1,62 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useContext } from "react";
 import { supabase } from "../supabaseClient";
 import { AppContext } from "../context/AppContext";
-const ChatRequestNotification = ({ knownRooms = [], onNewRoom }) => {
-  const [roomIds, setRoomIds] = useState(new Set(knownRooms.map(r => r.room_id)));
-  const {notify} = useContext(AppContext)
+
+const ChatRequestNotification = ({ fetchRooms }) => {
+  const { notify } = useContext(AppContext);
+
   useEffect(() => {
-    const channel = supabase
-      .channel("new-room-listener")
+    // Listener for new room inserts
+    const roomInsertSub = supabase
+      .channel("room-insert")
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
-          table: "messages",
+          table: "room",
         },
         async (payload) => {
-          const msg = payload.new;
-          const roomId = msg.room_id;
+          const newRoom = payload.new;
 
-          if (!roomIds.has(roomId)) {
-            // Update roomIds set
-            setRoomIds((prev) => new Set(prev).add(roomId));
+          console.log("🆕 New room inserted:", newRoom);
 
-            // Call parent handler if provided
-            if (onNewRoom) {
-              onNewRoom({
-                room_id: roomId,
-                name: msg.name,
-                email: msg.email,
-                created_at: msg.created_at,
-              });
-            }
+          // Optional: Play audio & notify
+          const audio = new Audio("/assets/ringtone/ringtone.mp3");
+          audio.play();
+          notify({ data: newRoom,message: `New Chat from ${newRoom.name || "a user"}`, type: "info" });
 
-            // Show notification
-            const audio = new Audio('/assets/ringtone/ringtone.mp3');
-            console.log('newmessage')
-            notify({ message: "New Message received", type: "info" })
-            audio.play()
-          }
+          // Optional: Refresh room list
+          fetchRooms();
         }
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [roomIds]);
+    // Listener for room updates
+    const roomUpdateSub = supabase
+      .channel("room-update")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "room",
+        },
+        (payload) => {
+          console.log("Room updated:", payload.new);
+          fetchRooms(); // Refresh room list silently
+        }
+      )
+      .subscribe();
 
-  return null;
+    // Cleanup on unmount
+    return () => {
+      supabase.removeChannel(roomInsertSub);
+      supabase.removeChannel(roomUpdateSub);
+    };
+  }, [fetchRooms, notify]);
+
+  return null; // No visual output
 };
 
 export default ChatRequestNotification;

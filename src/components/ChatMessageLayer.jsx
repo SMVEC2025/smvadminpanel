@@ -1,16 +1,21 @@
 import { Icon } from "@iconify/react/dist/iconify.js";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "../supabaseClient";
+import { AppContext } from "../context/AppContext";
+import ChatProfileLayer from "./ChatProfileLayer";
+import { MdContentCopy } from "react-icons/md";
 
 const ChatMessageLayer = () => {
   const [userRooms, setUserRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedName, setSelectedName] = useState(null);
+  const [showProfile, setShowProfile] = useState(null);
   const [messages, setMessages] = useState([]);
   const [replyMsg, setReplyMsg] = useState("");
   const messagesEndRef = useRef(null);
   const [currentRoom, setCurrentRoom] = useState(null);
   const [newMessage, setNewMessage] = useState("");
+  const { notify } = useContext(AppContext)
 
   // ✅ Fetch all rooms
   const fetchRooms = async () => {
@@ -66,7 +71,7 @@ const ChatMessageLayer = () => {
     // insert message
     const { error: insertError } = await supabase
       .from("messages")
-      .insert([{ room_id: currentRoom.room_id, content: trimmed,sender_type:"agent" }]);
+      .insert([{ room_id: currentRoom.room_id, content: trimmed, sender_type: "agent" }]);
 
     if (insertError) {
       console.error("Error sending message:", insertError);
@@ -120,65 +125,67 @@ const ChatMessageLayer = () => {
 
 
 
-    // ✅ Real-time listeners
-    useEffect(() => {
-      // ✅ New Room INSERT Listener (shows alert)
-      const roomInsertSub = supabase
-        .channel("room-insert")
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "room",
-          },
-          (payload) => {
-            alert("🆕 New Room Started!");
-            fetchRooms();
-          }
-        )
-        .subscribe();
-  
-      // ✅ Room UPDATE listener (refreshes list when last_msg or last_msg_at changes)
-      const roomUpdateSub = supabase
-        .channel("room-update")
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "room",
-          },
-          (payload) => {
-            fetchRooms(); // no alert, just update list
-          }
-        )
-        .subscribe();
-  
-      // ✅ Realtime message listener for selected room
-      const messageSub = supabase
-        .channel("message-stream")
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "messages",
-            filter: `room_id=eq.${currentRoom?.room_id}`,
-          },
-          (payload) => {
-            setMessages((prev) => [...prev, payload.new]);
-          }
-        )
-        .subscribe();
-  
-      return () => {
-        supabase.removeChannel(roomInsertSub);
-        supabase.removeChannel(roomUpdateSub);
-        supabase.removeChannel(messageSub);
-      };
-    }, [currentRoom?.room_id]);
-  
+  // ✅ Real-time listeners
+  useEffect(() => {
+    // ✅ New Room INSERT Listener (shows alert)
+    const roomInsertSub = supabase
+      .channel("room-insert")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "room",
+        },
+        (payload) => {
+          const audio = new Audio('/assets/ringtone/ringtone.mp3');
+          notify({ message: "New Message received", type: "info" })
+          audio.play()
+          fetchRooms();
+        }
+      )
+      .subscribe();
+
+    // ✅ Room UPDATE listener (refreshes list when last_msg or last_msg_at changes)
+    const roomUpdateSub = supabase
+      .channel("room-update")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "room",
+        },
+        (payload) => {
+          fetchRooms(); // no alert, just update list
+        }
+      )
+      .subscribe();
+
+    // ✅ Realtime message listener for selected room
+    const messageSub = supabase
+      .channel("message-stream")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `room_id=eq.${currentRoom?.room_id}`,
+        },
+        (payload) => {
+          setMessages((prev) => [...prev, payload.new]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(roomInsertSub);
+      supabase.removeChannel(roomUpdateSub);
+      supabase.removeChannel(messageSub);
+    };
+  }, [currentRoom?.room_id]);
+
 
   const deleteChat = async () => {
     if (!selectedRoom) return alert("No chat selected");
@@ -202,7 +209,7 @@ const ChatMessageLayer = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
- 
+
   return (
     <div className="chat-wrapper">
       <div className="chat-sidebar card">
@@ -215,41 +222,46 @@ const ChatMessageLayer = () => {
               onClick={() => handleRoomClick(room)}
             >
               <div className="imgdiv">
-              {room.name.split("")[0]}
+                {room.name.split("")[0]}
               </div>
               <div className="info">
                 <h6 className="text-sm m-0">{room.name}</h6>
                 <p className="text-sm m-0">{room.last_msg.length > 10 ? room.last_msg.slice(0, 17) + '...' : room.last_msg}</p>
               </div>
               <div className="action text-end">
-                <p className='mb-0 text-neutral-400 text-xs lh-1'>{room.last_msg_at?(new Date(room.last_msg_at).toLocaleString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })):('New')}</p>
-                {room?.unseen_count == '1000' && ( <p className="noti">new</p>)}
+                <p className='mb-0 text-neutral-400 text-xs lh-1'>{room.last_msg_at ? (new Date(room.last_msg_at).toLocaleString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })) : ('New')}</p>
+                {room?.unseen_count == '1000' && (<p className="noti">new</p>)}
                 {room?.unseen_count > 0 && room?.unseen_count < 1000 && (
-  <p className="notinum">{room?.unseen_count}</p>
-)}
+                  <p className="notinum">{room?.unseen_count}</p>
+                )}
 
-                {room?.seen == 'true' || !room.created_at?(
+                {room?.seen == 'true' || !room.created_at ? (
                   <span className='w-10-px h-10-px text-xs rounded-circle bg-warning-main text-white d-inline-flex align-items-center justify-content-center'>
-                  
+
                   </span>
-                ):null}
+                ) : null}
               </div>
             </div>
           ))}
         </div>
       </div>
- {console.log("currentRoom",currentRoom)}
- {console.log("messages",messages)}
- {console.log("rooms",userRooms)}
+      {console.log("currentRoom", currentRoom)}
+      {console.log("messages", messages)}
+      {console.log("rooms", userRooms)}
       <div className="chat-main card">
         {currentRoom && (
-          <div className="chat-sidebar-single active">
-             <div className="imgdiv" style={{width:"40px",height:"40px"}}>
+          <div className="chat-sidebar-single active" onMouseEnter={()=>{setShowProfile(true)}} onMouseLeave={()=>{setShowProfile(false)}}>
+            <div className="imgdiv" style={{ width: "40px", height: "40px" }}>
               {currentRoom.name.split("")[0]}
-              </div>
-            <div className="info">
-              <h6 className="text-md mb-0">{currentRoom.name}</h6>
             </div>
+         
+            <div className="info" style={{display:'flex',flexDirection:"row",justifyContent:"start",alignItems:"center"}}>
+              <h6 className="text-md mb-0" >{currentRoom.name}</h6> - 
+              <h6 className="text-md mb-0" >{currentRoom.email}</h6>
+              <div><MdContentCopy/></div>
+
+            </div>
+            
             <div className="action d-inline-flex align-items-center gap-3">
               <div className="btn-group">
                 <button
@@ -337,10 +349,11 @@ const ChatMessageLayer = () => {
         )}
       </div>
       <div className="chat_userprofile_container">
-        
+
       </div>
     </div>
   );
 };
 
 export default ChatMessageLayer;
+

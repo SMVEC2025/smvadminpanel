@@ -42,6 +42,8 @@
     "lightgallery": "^2.8.2",
     "lightgallery.js": "^1.4.0",
     "masonry-layout": "^4.2.2",
+    "primeicons": "^7.0.0",
+    "primereact": "^10.9.4",
     "react": "^18.2.0",
     "react-apexcharts": "^1.7.0",
     "react-beautiful-dnd": "^13.1.1",

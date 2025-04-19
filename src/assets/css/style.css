@@ -62,6 +62,8 @@
     4.14 Position Css
 / ================================= Table Of Contents =================================== **/
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
+
 :root {
   --default-font: ;
   --h1: clamp(2rem, 1.2rem + 4vw, 4.5rem);
@@ -14414,7 +14416,6 @@ td.fc-header-center {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
-  height: 100%;
   overflow-y: scroll;
 }
 
@@ -14423,6 +14424,7 @@ td.fc-header-center {
   background-color: #f6f7fb;
   padding: 0 10px;
   padding-top: 10px;
+  max-height: calc(100vh - 100px);
 }
 
 @media (min-width: 768px) {
@@ -14442,6 +14444,7 @@ td.fc-header-center {
 .chat-wrapper .chat-main {
   width: 100%;
   margin-top: 1.875rem;
+  height: calc(100%);
 }
 
 @media (min-width: 768px) {
@@ -14520,18 +14523,18 @@ td.fc-header-center {
 }
 
 .chat-all-list {
-  max-height: 534px;
+  max-height: 90vh;
   overflow-y: auto;
 }
 
 @media (min-width: 1200px) {
   .chat-all-list {
-    max-height: 400px;
+    max-height: 90vh;
   }
 }
 @media (min-width: 1400px) {
   .chat-all-list {
-    max-height: 534px;
+    max-height: calc(100% - 20px);
   }
 }
 .chat-all-list::-webkit-scrollbar {
@@ -14626,12 +14629,14 @@ td.fc-header-center {
 
 .chat-message-list {
   flex-grow: 1;
-  height: calc(100vh - 300px) !important;
   overflow-y: scroll;
   padding: 1.5rem;
   display: flex;
   flex-flow: column;
   overflow-y: auto;
+  max-height: calc(100vh - 250px);
+  min-height: calc(100vh - 250px);
+
 
 }
 
@@ -15805,23 +15810,25 @@ td.fc-header-center {
   bottom: 40px;
   right: 40px;
   z-index: 9999;
-  padding: 12px 20px;
   border-radius: 8px;
   font-weight: 500;
   color: white;
   animation: slideDown 0.3s ease-in-out;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
   align-items: center;
-  gap: 10px;
   min-width: 250px;
   max-width: 90%;
-  justify-content: space-between;
-  border: 1px solid gray;
+  border: 1px solid #ffefdb85;
+  padding: 10px 10px;
+
 }
 
 .notification-bar.info {
-  background-color: #140e0e;
+  background: rgba(255, 255, 255, 0.2); /* semi-transparent white */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  color: #fff;
 }
 
 .notification-bar.success {
@@ -15836,7 +15843,54 @@ td.fc-header-center {
   background-color: #ffc107;
   color: #000;
 }
+.noti_div1{
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  color: #51000f;
+  gap: 5px;
+}
+.noti_div1>img{
+  width: 25px;
+}
+.noti_div1>p{
+  padding: 0;
+  margin:0;
+}
+.noti_div2{
+  display: flex;
+  font-display: row;
+  color: black;
+  margin-top: 20px;
+  gap: 10px;
+  padding: 10px 30px;
 
+}
+.noti_div21{
+  width: 50px;
+  height: 50px;
+  background-color: #e4e1fc;
+  font-size: 30px;
+  color: #958fce;
+  border-radius: 50%;
+  stroke-dashoffset: 0%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+.noti_div22>p,.noti_div22span,.noti_div22  {
+  padding: 0;
+  margin: 0;
+}
+.noti_div22{
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  flex-direction: column;
+  color: gray;
+}
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -15854,6 +15908,10 @@ td.fc-header-center {
   font-size: 18px;
   color: inherit;
   cursor: pointer;
+  color: gray;
+  position: absolute;
+  top: 10px;
+  right: 20px;
 }
 .refresh_button {
   background-color: #e9e8f0;
@@ -15879,3 +15937,134 @@ td.fc-header-center {
    top: 0;
    background-color: red;
 } */
+
+/* body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f4f4;
+} */
+
+.admin-login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.admin-title {
+  font-size: 28px !important;
+  font-weight: 650;
+  color: #3a151d;
+  text-transform: uppercase;
+  font-family: "Jost", sans-serif;
+  font-optical-sizing: auto;
+}
+
+.admin-login-container form {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+}
+
+.admin-login-container input {
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  transition: border 0.3s ease;
+}
+
+.admin-login-container input:focus {
+  border-color: #ffa87e;
+  outline: none;
+}
+
+.admin-login-container button {
+  padding: 14px 16px;
+  background-color: #f06b39;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-align: center;
+}
+
+.admin-login-container button:hover {
+  background-color: #f28c65;
+}
+.admin-login-form img{
+  width: 100px;
+  
+}
+.admin-title-div{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.loader{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+/* Styling for rounded icons */
+.table-icon{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: white;
+}
+.table-icon.dlt{
+  background-color: #d83d36;
+}
+.table-icon.view{
+  background-color: gray;
+}
+.cpl_conainer{
+  width: 300px;
+  height: 300px;
+  background-color: #edf2f2;
+  position: absolute;
+  top: 150px;
+  border-radius: 5px;
+  z-index: 2;
+  padding: 20px;
+}
+.cpl_div1{
+  width: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+}
+.admin-userdp{
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-transform: uppercase;
+  font-size: 20px;
+  font-weight: 500;
+  color: white;
+  background-color: #f77d56;
+  border-radius: 50%;
+}
