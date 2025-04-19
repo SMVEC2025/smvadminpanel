@@ -9,153 +9,176 @@ const ChatMessageLayer = () => {
   const [messages, setMessages] = useState([]);
   const [replyMsg, setReplyMsg] = useState("");
   const messagesEndRef = useRef(null);
+  const [currentRoom, setCurrentRoom] = useState(null);
+  const [newMessage, setNewMessage] = useState("");
 
-  const fetchUniqueRooms = async () => {
-    const { data: allMessages, error } = await supabase
+  // ✅ Fetch all rooms
+  const fetchRooms = async () => {
+    const { data, error } = await supabase
+      .from("room")
+      .select('*')
+      .order("last_msg_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching rooms:", error);
+    } else {
+      setUserRooms(data);
+    }
+  };
+
+  // ✅ Fetch messages for selected room
+  const fetchMessages = async (roomId) => {
+    const { data, error } = await supabase
       .from("messages")
-      .select("room_id, name, email, created_at")
-      .order("created_at", { ascending: false });
+      .select('*')
+      .eq("room_id", roomId)
+      .order("created_at", { ascending: true });
 
     if (error) {
       console.error("Error fetching messages:", error);
+    } else {
+      setMessages(data);
+    }
+  };
+
+  // ✅ Handle room click
+  const handleRoomClick = async (room) => {
+    setCurrentRoom(room);
+
+    // reset unseen_count
+    const { error } = await supabase
+      .from("room")
+      .update({ unseen_count: 0 })
+      .eq("room_id", room.room_id);
+
+    if (error) {
+      console.error("Error resetting unseen count:", error);
+    }
+
+    fetchMessages(room.room_id);
+  };
+
+  // ✅ Send new message
+  const sendMessage = async () => {
+    const trimmed = newMessage.trim();
+    if (!trimmed || !currentRoom) return;
+
+    // insert message
+    const { error: insertError } = await supabase
+      .from("messages")
+      .insert([{ room_id: currentRoom.room_id, content: trimmed,sender_type:"agent" }]);
+
+    if (insertError) {
+      console.error("Error sending message:", insertError);
       return;
     }
 
-    const roomCount = {};
-    const roomMap = new Map();
+    // update room meta
+    const { error: updateError } = await supabase
+      .from("room")
+      .update({
+        last_msg: trimmed,
+        last_msg_at: new Date().toISOString(),
+      })
+      .eq("room_id", currentRoom.room_id);
 
-    // Count occurrences of each room_id
-    for (const msg of allMessages) {
-      roomCount[msg.room_id] = (roomCount[msg.room_id] || 0) + 1;
+    if (updateError) {
+      console.error("Error updating room:", updateError);
     }
 
-    for (const msg of allMessages) {
-      const { room_id, name, email, created_at } = msg;
+    setNewMessage("");
+    fetchMessages(currentRoom.room_id);
+  };
 
-      const seen = roomCount[room_id] > 1 ? "false" : "true";
-
-      if (!roomMap.has(room_id)) {
-        roomMap.set(room_id, {
-          room_id,
-          name: name || null,
-          email: email || null,
-          created_at,
-          seen,
-        });
-      } else {
-        const existing = roomMap.get(room_id);
-
-        if (new Date(created_at) > new Date(existing.created_at)) {
-          existing.created_at = created_at;
-        }
-
-        if ((!existing.name || !existing.email) && name && email) {
-          existing.name = name;
-          existing.email = email;
-        }
-
-        existing.seen = seen; // Always keep this up to date just in case
-        roomMap.set(room_id, existing);
-      }
-    }
-
-    const refinedRooms = Array.from(roomMap.values());
-
-    // Ensure final sort
-    refinedRooms.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-    setUserRooms(refinedRooms);
-  };  useEffect(() => {
-    
-  
-    fetchUniqueRooms();
-  }, [messages]);
-  
-
-  // Scroll to latest message
+  // ✅ Realtime listener for new rooms
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // Real-time message listener
-  useEffect(() => {
-    const channel = supabase
-      .channel("agent-room-listener")
+    const subscription = supabase
+      .channel("room-listener")
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
-          table: "messages",
+          table: "room",
         },
-        async (payload) => {
-          const newMsg = payload.new;
-          const room = newMsg.room_id;
-  
-          // Check if the room already exists in userRooms
-          const isNewRoom = !userRooms.some((r) => r.room_id === room);
-  
-          // If new room, log to console
-          if (isNewRoom) {
-            fetchUniqueRooms()
-            const audio = new Audio('/assets/ringtone/ringtone.mp3');
-            audio.play()
-          }
-  
-          // Add to userRooms if it's a new room
-          setUserRooms((prev) => {
-            const exists = prev.some((r) => r.room_id === room);
-            if (exists) return prev;
-            return [
-              ...prev,
-              {
-                room_id: room,
-                name: newMsg.name || "Unknown",
-                email: newMsg.email || "",
-                created_at: newMsg.created_at,
-                seen: "false",
-              },
-            ];
-          });
-  
-          // If selected room is this room, add message to chat
-          if (room === selectedRoom) {
-            setMessages((prev) => [...prev, newMsg]);
-          }
+        (payload) => {
+          console.log("🆕 New room:", payload.new);
+          fetchRooms();
         }
       )
       .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, []);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+
+
+    // ✅ Real-time listeners
+    useEffect(() => {
+      // ✅ New Room INSERT Listener (shows alert)
+      const roomInsertSub = supabase
+        .channel("room-insert")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "room",
+          },
+          (payload) => {
+            alert("🆕 New Room Started!");
+            fetchRooms();
+          }
+        )
+        .subscribe();
   
-    return () => supabase.removeChannel(channel);
-  }, [selectedRoom, userRooms]);
+      // ✅ Room UPDATE listener (refreshes list when last_msg or last_msg_at changes)
+      const roomUpdateSub = supabase
+        .channel("room-update")
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "room",
+          },
+          (payload) => {
+            fetchRooms(); // no alert, just update list
+          }
+        )
+        .subscribe();
   
-
-  const loadMessages = async (roomid, name) => {
-    setSelectedRoom(roomid);
-    setSelectedName(name);
-
-    const { data, error } = await supabase
-      .from("messages")
-      .select("*")
-      .eq("room_id", roomid)
-      .order("created_at", { ascending: true });
-
-    if (error) console.error("Error loading messages:", error);
-    else setMessages(data);
-  };
-
-  const sendReply = async () => {
-    if (!replyMsg.trim()) return;
-
-    const { error } = await supabase.from("messages").insert({
-      content: replyMsg,
-      sender_type: "agent",
-      room_id: selectedRoom,
-    });
-
-    if (error) console.error("Send message failed:", error);
-    else setReplyMsg("");
-  };
+      // ✅ Realtime message listener for selected room
+      const messageSub = supabase
+        .channel("message-stream")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+            filter: `room_id=eq.${currentRoom?.room_id}`,
+          },
+          (payload) => {
+            setMessages((prev) => [...prev, payload.new]);
+          }
+        )
+        .subscribe();
+  
+      return () => {
+        supabase.removeChannel(roomInsertSub);
+        supabase.removeChannel(roomUpdateSub);
+        supabase.removeChannel(messageSub);
+      };
+    }, [currentRoom?.room_id]);
+  
 
   const deleteChat = async () => {
     if (!selectedRoom) return alert("No chat selected");
@@ -171,32 +194,40 @@ const ChatMessageLayer = () => {
     } else {
       alert("Chat deleted");
       setMessages([]);
+      setSelectedRoom(null);
+      setSelectedName(null);
+      fetchUniqueRooms();
     }
   };
-
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
  
   return (
     <div className="chat-wrapper">
       <div className="chat-sidebar card">
         <div className="chat-all-list">
-          {userRooms.map((room) => (
+          <div className="chatboxname">Chats</div>
+          {userRooms?.map((room) => (
             <div
-              className={`chat-sidebar-single ${selectedRoom === room.room_id ? "opened" : ""}`}
+              className={`chat-sidebar-single ${currentRoom?.room_id === room.room_id ? "opened" : ""}`}
               key={room.room_id}
-              onClick={() => loadMessages(room.room_id, room.name)}
+              onClick={() => handleRoomClick(room)}
             >
-              <div className="img">
-                <img
-                  style={{ borderRadius: "50%" }}
-                  src="https://img.freepik.com/free-vector/young-man-orange-hoodie_1308-175788.jpg"
-                  alt="user icon"
-                />
+              <div className="imgdiv">
+              {room.name.split("")[0]}
               </div>
               <div className="info">
-                <h6 className="text-sm mb-1">{room.name}</h6>
+                <h6 className="text-sm m-0">{room.name}</h6>
+                <p className="text-sm m-0">{room.last_msg.length > 10 ? room.last_msg.slice(0, 17) + '...' : room.last_msg}</p>
               </div>
               <div className="action text-end">
-                <p className='mb-0 text-neutral-400 text-xs lh-1'>{room.created_at?(new Date(room.created_at).toLocaleString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })):('New')}</p>
+                <p className='mb-0 text-neutral-400 text-xs lh-1'>{room.last_msg_at?(new Date(room.last_msg_at).toLocaleString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })):('New')}</p>
+                {room?.unseen_count == '1000' && ( <p className="noti">new</p>)}
+                {room?.unseen_count > 0 && room?.unseen_count < 1000 && (
+  <p className="notinum">{room?.unseen_count}</p>
+)}
+
                 {room?.seen == 'true' || !room.created_at?(
                   <span className='w-10-px h-10-px text-xs rounded-circle bg-warning-main text-white d-inline-flex align-items-center justify-content-center'>
                   
@@ -207,19 +238,17 @@ const ChatMessageLayer = () => {
           ))}
         </div>
       </div>
-
+ {console.log("currentRoom",currentRoom)}
+ {console.log("messages",messages)}
+ {console.log("rooms",userRooms)}
       <div className="chat-main card">
-        {selectedRoom && (
+        {currentRoom && (
           <div className="chat-sidebar-single active">
-            <div className="img">
-              <img
-                style={{ borderRadius: "50%" }}
-                src="https://img.freepik.com/free-vector/young-man-orange-hoodie_1308-175788.jpg"
-                alt="user icon"
-              />
-            </div>
+             <div className="imgdiv" style={{width:"40px",height:"40px"}}>
+              {currentRoom.name.split("")[0]}
+              </div>
             <div className="info">
-              <h6 className="text-md mb-0">{selectedName}</h6>
+              <h6 className="text-md mb-0">{currentRoom.name}</h6>
             </div>
             <div className="action d-inline-flex align-items-center gap-3">
               <div className="btn-group">
@@ -255,13 +284,13 @@ const ChatMessageLayer = () => {
         )}
 
         <div className="chat-message-list">
-          {selectedRoom ? (
+          {currentRoom ? (
             <>
               {messages.map((msg, i) => (
                 <div key={i} className={`chat-single-message ${msg.sender_type === "agent" ? "right" : "left"}`}>
                   <div className="chat-message-content">
-                    <p className="mb-3">{msg.content}</p>
-                    <p className="chat-time mb-0">
+                    <p className="m-0">{msg.content}</p>
+                    <p className="chat-time m-0">
                       <span>
                         {new Date(msg.created_at).toLocaleTimeString("en-US", {
                           hour: "numeric",
@@ -280,24 +309,24 @@ const ChatMessageLayer = () => {
           )}
         </div>
 
-        {selectedRoom && (
+        {currentRoom && (
           <div className="chat-message-box">
             <input
               type="text"
               name="chatMessage"
               placeholder="Write message"
-              value={replyMsg}
-              onChange={(e) => setReplyMsg(e.target.value)}
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  sendReply();
+                  sendMessage();
                 }
               }}
             />
             <div className="chat-message-box-action">
               <button
-                onClick={sendReply}
+                onClick={sendMessage}
                 className="btn btn-sm btn-primary-600 radius-8 d-inline-flex align-items-center gap-1"
               >
                 Send
@@ -306,6 +335,9 @@ const ChatMessageLayer = () => {
             </div>
           </div>
         )}
+      </div>
+      <div className="chat_userprofile_container">
+        
       </div>
     </div>
   );

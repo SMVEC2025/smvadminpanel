@@ -5,9 +5,6 @@ import ChatMessageLayer from "../components/ChatMessageLayer";
 const ChatMessagePage = () => {
   return (
     <>
-      
-        <Breadcrumb title='Chat Message' />
-
         <ChatMessageLayer />
     
     </>

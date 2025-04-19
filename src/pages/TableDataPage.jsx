@@ -9,7 +9,6 @@ const TableDataPage = () => {
 
 
         {/* Breadcrumb */}
-        <Breadcrumb title="appointments" />
 
         {/* TableDataLayer */}
         <TableDataLayer />
