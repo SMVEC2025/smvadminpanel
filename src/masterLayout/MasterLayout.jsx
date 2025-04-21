@@ -12,9 +12,8 @@ const MasterLayout = ({ children }) => {
   let [sidebarActive, seSidebarActive] = useState(false);
   let [mobileMenu, setMobileMenu] = useState(false);
   const location = useLocation(); // Hook to get the current route
-  const [openNotify,setOpenNotify] = useState(false)
-  const {logout,user} = useContext(AppContext)
- console.log(user)
+  const [openNotify, setOpenNotify] = useState(false)
+  const { logout, user } = useContext(AppContext)
   useEffect(() => {
     const handleDropdownClick = (event) => {
       event.preventDefault();
@@ -102,8 +101,8 @@ const MasterLayout = ({ children }) => {
           sidebarActive
             ? "sidebar active "
             : mobileMenu
-            ? "sidebar sidebar-open"
-            : "sidebar"
+              ? "sidebar sidebar-open"
+              : "sidebar"
         }
       >
         <button
@@ -114,37 +113,37 @@ const MasterLayout = ({ children }) => {
           <Icon icon='radix-icons:cross-2' />
         </button>
         <div>
-         {sidebarActive?(
-          <Link to='/' className='sidebar-logo'>
-          <img
-            src='/assets/images/SMV_icon.png'
-            alt='site logo'
+          {sidebarActive ? (
+            <Link to='/' className='sidebar-logo'>
+              <img
+                src='/assets/images/SMV_icon.png'
+                alt='site logo'
 
-          />
-       
-         
-        </Link>
-         ):(
-          <Link to='/' className='sidebar-logo'>
-          <img
-            src='/assets/images/logofull.png'
-            alt='site logo'
-            className='light-logo'
-          />
-          <img
-            src='/assets/images/logofull.png'
-            alt='site logo'
-            className='dark-logo'
-          />
-         
-        </Link>
-         )}
-          
+              />
+
+
+            </Link>
+          ) : (
+            <Link to='/' className='sidebar-logo'>
+              <img
+                src='/assets/images/logofull.png'
+                alt='site logo'
+                className='light-logo'
+              />
+              <img
+                src='/assets/images/logofull.png'
+                alt='site logo'
+                className='dark-logo'
+              />
+
+            </Link>
+          )}
+
         </div>
         <div className='sidebar-menu-area'>
           <ul className='sidebar-menu' id='sidebar-menu'>
-          <li>
-          <NavLink
+            <li>
+              <NavLink
                 to='/'
                 className={("")}
               >
@@ -152,7 +151,7 @@ const MasterLayout = ({ children }) => {
                   className='menu-icon' />
                 <span>Dashboard</span>
               </NavLink>
-              </li>
+            </li>
 
             <li>
               <NavLink
@@ -171,16 +170,16 @@ const MasterLayout = ({ children }) => {
                 <Icon icon='bi:chat-dots' className='menu-icon' />
                 <span>Chat</span>
               </NavLink>
-              </li>
-              <li>
+            </li>
+            <li>
               <NavLink
                 to='queries'
                 className={(navData) => (navData.isActive ? "active-page" : "")}
               >
-                <Icon icon='bi:chat-dots' className='menu-icon' />
+                <Icon icon="mdi:comment-question-outline" className="menu-icon" />
                 <span>Queries</span>
               </NavLink>
-              </li>
+            </li>
           </ul>
         </div>
       </aside>
@@ -216,27 +215,27 @@ const MasterLayout = ({ children }) => {
                 >
                   <Icon icon='heroicons:bars-3-solid' className='icon' />
                 </button>
-            
+
               </div>
             </div>
             <div className='col-auto'>
               <div className='d-flex flex-wrap align-items-center gap-3'>
                 {/* ThemeToggleButton */}
                 <ThemeToggleButton />
-                 
+
                 {/* Language dropdown end */}
-                
+
                 <div className="refresh_button" onClick={hardRefreshPage}>
-                <IoIosRefresh/>
+                  <IoIosRefresh />
                 </div>
                 {/* Message dropdown end */}
                 <div className='dropdown'>
-                  
+
                   <div className='dropdown-menu to-top dropdown-menu-sm'>
                     <div className='py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2'>
-                    <NotificationBar/>
+                      <NotificationBar />
                     </div>
-                    
+
                   </div>
                 </div>
                 <div className='dropdown'>
@@ -267,7 +266,7 @@ const MasterLayout = ({ children }) => {
                       </button>
                     </div>
                     <ul className='to-top-list'>
-                     
+
                       <li onClick={logout}>
                         <Link
                           className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-danger d-flex align-items-center gap-3'
@@ -287,12 +286,12 @@ const MasterLayout = ({ children }) => {
 
         {/* dashboard-main-body */}
         <div className='dashboard-main-body'>
-          <Outlet/>
+          <Outlet />
 
         </div>
 
         {/* Footer section */}
-       
+
       </main>
     </section>
   );

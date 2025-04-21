@@ -6,7 +6,6 @@ const NotificationBar = () => {
   const { notification, setNotification } = useContext(AppContext);
 
   if (!notification) return null;
-
   return (
     <div className={`notification-bar ${notification.type}`}>
       <div className="noti_div1">
@@ -19,7 +18,7 @@ const NotificationBar = () => {
         </div>
         <div className="noti_div22">
         <span>{notification?.data?.name}</span>
-        <p>One New Message!</p>
+        <p>{notification.message}</p>
         </div>
       </div>
       <button className="close-btn" onClick={() => setNotification(null)}>×</button>

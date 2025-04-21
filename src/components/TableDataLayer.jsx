@@ -20,7 +20,6 @@ const TableDataLayer = () => {
 
   const fetchAppointments = async () => {
     setLoading(true);
-    console.log('appoint fetchinf')
     const { data, error } = await supabase
       .from("appointments")
       .select("*")
@@ -220,9 +219,13 @@ const TableDataLayer = () => {
               </div>
               <div className="modal-body">
                 <p><strong>Name:</strong> {viewData.name}</p>
-                <p><strong>Email:</strong> {viewData.created_at?.split("T")[0]}</p>
+                <p><strong>Email:</strong> {viewData.email}</p>
+                <p><strong>Phone:</strong> {viewData.phone}</p>
                 <p><strong>Date:</strong> {viewData.date}</p>
-                <p><strong>Package:</strong> {viewData.package}</p>
+                <p><strong>Booken On:</strong> {viewData.created_at?.split("T")[0]}</p>
+               
+               {viewData?.package != "No" &&( <p><strong>Package:</strong> {viewData.selectedPackage}</p>)}
+               <p><strong>Time:</strong> {viewData.slot}</p>
               </div>
               <div className="modal-footer">
                 <button

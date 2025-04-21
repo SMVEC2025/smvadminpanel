@@ -19,13 +19,11 @@ const ChatRequestNotification = ({ fetchRooms }) => {
         async (payload) => {
           const newRoom = payload.new;
 
-          console.log("🆕 New room inserted:", newRoom);
 
           // Optional: Play audio & notify
           const audio = new Audio("/assets/ringtone/ringtone.mp3");
           audio.play();
           notify({ data: newRoom,message: `New Chat from ${newRoom.name || "a user"}`, type: "info" });
-
           // Optional: Refresh room list
           fetchRooms();
         }
@@ -43,7 +41,6 @@ const ChatRequestNotification = ({ fetchRooms }) => {
           table: "room",
         },
         (payload) => {
-          console.log("Room updated:", payload.new);
           fetchRooms(); // Refresh room list silently
         }
       )

@@ -13,12 +13,14 @@ import NotificationBar from "./masterLayout/NotificationBar";
 import Queries from "./components/Queries";
 import Login from "./components/Login";
 import ProtectedRoute from "./masterLayout/ProtectedRoute";
+import ChatRequestNotification from "./components/ChatRequestNotification";
 
 
 function App() {
   return (
     <AppProvider>
       <NotificationBar />
+      <ChatRequestNotification/>
       <BrowserRouter>
         <RouteScrollToTop />
         <Routes>
